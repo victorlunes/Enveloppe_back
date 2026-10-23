@@ -1,3 +1,23 @@
 spring:
   application:
     name: enveloppe
+
+  #    lê as variáveis do arquivo .env na raiz do projeto (optional = não quebra se o arquivo não existir)
+  config:
+    import: optional:file:.env[.properties]
+
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    #    eu poder ver os scripts sql no terminal
+    show-sql: true
+
+  flyway:
+    #ativar o flyway
+    enabled: true
+    #localização do migration
+    locations: classpath:db/migration

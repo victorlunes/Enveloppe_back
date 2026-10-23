@@ -1,0 +1,91 @@
+# MEU PC = meu Mac, a pasta do projeto
+# DOCKER = dentro dos containers
+
+# lista dos containers que vão subir
+services:
+
+  # ===== BANCO DE DADOS =====
+  # "database" é o nome do serviço. Dentro da rede do Docker, esse nome vira o endereço do banco
+  database:
+
+    # DOCKER: usa a imagem oficial do Postgres 17, baixada do Docker Hub
+    # não precisa de Dockerfile, porque a imagem já vem pronta
+    image: postgres:17
+
+    # variáveis de ambiente que a imagem do Postgres lê quando o container liga
+    #
+    # IMPORTANTE: essas 3 variáveis só são usadas quando o banco AINDA NÃO EXISTE
+    # (volume "postgres-data" vazio). Nessa primeira vez o container:
+    #   1) cria o banco "enveloppedb"
+    #   2) cria o usuário master (POSTGRES_USER / POSTGRES_PASSWORD)
+    # Nas próximas vezes o banco já existe no volume, então o container só liga o Postgres
+    # com o que já está salvo. Mudar esses valores no .env depois NÃO muda nada no banco.
+    #
+    # O master NÃO é o usuário da API. O usuário da API (enveloppe) precisa ser criado
+    # dentro do banco, de um destes jeitos:
+    #   - na mão: entrar no container com o master e rodar CREATE USER uma vez
+    #   - automático: um script em /docker-entrypoint-initdb.d, que roda só quando o banco nasce
+    # Depois de criado, ele fica salvo no volume até um "docker compose down -v".
+    environment:
+      # DOCKER: nome do banco criado na primeira vez
+      POSTGRES_DB: enveloppedb
+      # MEU PC -> DOCKER: usuário e senha do master (dono do banco), vêm do .env
+      # o ${...} faz o compose buscar o valor no arquivo .env do meu projeto
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    # liga uma porta do meu Mac a uma porta do container ("Mac:container")
+    ports:
+      # MEU PC -> DOCKER: quem acessar a porta 5433 do Mac cai na porta 5432 do Postgres
+      # é assim que o IntelliJ/DBeaver no meu Mac conseguem acessar o banco
+      # 127.0.0.1 = só o meu Mac acessa, outras pessoas do wifi não conseguem
+      - "127.0.0.1:5433:5432"
+
+    # guarda os dados fora do container
+    volumes:
+      # DOCKER: a pasta onde o Postgres salva os dados (/var/lib/postgresql/data)
+      # fica no volume "postgres-data". Se o container for apagado, os dados continuam lá
+      - postgres-data:/var/lib/postgresql/data
+
+    # teste que o Docker roda para saber se o banco já está pronto para receber conexões
+    healthcheck:
+      # DOCKER: roda o pg_isready dentro do container, que responde se o Postgres está aceitando conexões
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d enveloppedb"]
+      # repete o teste a cada 5 segundos
+      interval: 5s
+      # tenta até 10 vezes antes de marcar o banco como "com problema"
+      retries: 10
+
+  # ===== MINHA API =====
+  api:
+
+    # MEU PC -> DOCKER: em vez de baixar uma imagem pronta, monta a imagem
+    # usando o Dockerfile que está na pasta do projeto (o "." é a pasta atual)
+    build: .
+
+    # variáveis que o Spring lê no application.yaml (${DATABASE_URL}, etc.)
+    # o .env não entra na imagem, então os dados do banco chegam por aqui
+    environment:
+      # DOCKER: endereço do banco visto de dentro da rede do Docker
+      #   database -> nome do serviço lá de cima (não é localhost, porque localhost seria a própria API)
+      #   5432     -> porta de dentro do container do Postgres (a 5433 é só do Mac)
+      DATABASE_URL: jdbc:postgresql://database:5432/enveloppedb
+      # MEU PC -> DOCKER: usuário e senha que a API usa no banco, vêm do .env
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+
+    # MEU PC -> DOCKER: quem acessar localhost:8080 no Mac cai na porta 8080 da API
+    ports:
+      - "8080:8080"
+
+    # DOCKER: ordem de subida. A API só liga quando o healthcheck do banco passar,
+    # senão o Spring tentaria conectar num banco que ainda está iniciando e daria erro
+    depends_on:
+      database:
+        condition: service_healthy
+
+# DOCKER: cria o volume "postgres-data" usado lá em cima
+# o Docker guarda ele no espaço dele (não é uma pasta do projeto)
+# só é apagado se eu rodar "docker compose down -v"
+volumes:
+  postgres-data:

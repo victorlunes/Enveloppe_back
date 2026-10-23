@@ -1,0 +1,7 @@
+# arquivos que NÃO entram na imagem
+# .env fica de fora: as senhas chegam pelo docker-compose como variáveis de ambiente
+.env
+target/
+.idea/
+.git/
+*.iml

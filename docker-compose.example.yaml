@@ -1,0 +1,55 @@
+# Exemplo de docker-compose para rodar a API + banco num servidor.
+# Nenhuma senha fica aqui: os valores ${...} vêm do arquivo .env do servidor
+# (use o .env.example como guia).
+#
+# Para usar: copie para "docker-compose.yaml" no servidor, crie o .env e rode
+#   docker compose up -d --build
+
+services:
+  database:
+    image: postgres:17
+    container_name: enveloppe-db
+    environment:
+      POSTGRES_DB: enveloppedb
+      # usuário master: só para administração, a API NÃO usa ele
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    # sem "ports": o banco não fica acessível de fora do servidor,
+    # só a API alcança ele pela rede interna do Docker
+
+    volumes:
+      # guarda os dados fora do container, assim eles não somem num "docker compose down"
+      - postgres-data:/var/lib/postgresql/data
+
+    # espera o Postgres aceitar conexões antes de liberar a API
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d enveloppedb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+    # Reinicia o container automaticamente se algum erro acontecer e ele parar
+    # ou se o servidor reiniciar
+    restart: always
+
+  api:
+    # precisa de um Dockerfile na raiz do projeto
+    build: .
+    container_name: enveloppe-api
+    environment:
+      # "database" é o nome do serviço acima: dentro da rede do Docker ele vira o endereço do banco
+      DATABASE_URL: jdbc:postgresql://database:5432/enveloppedb
+      # usuário da aplicação (criado com CREATE USER, sem ser superusuário)
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      # só a API fica exposta (em produção, coloque um proxy com HTTPS na frente)
+      - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: always
+
+volumes:
+  postgres-data:
