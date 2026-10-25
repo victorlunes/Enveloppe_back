@@ -12,12 +12,16 @@ spring:
     password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
-  jpa:
-    #    eu poder ver os scripts sql no terminal
-    show-sql: true
+#  jpa:
+#    #    eu poder ver os scripts sql no terminal
+#    show-sql: true
 
   flyway:
     #ativar o flyway
     enabled: true
     #localização do migration
     locations: classpath:db/migration
+
+logging:
+  level:
+    org.springframework.jdbc.core: DEBUG #    eu poder ver os scripts sql no terminal
