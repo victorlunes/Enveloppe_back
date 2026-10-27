@@ -1,0 +1,64 @@
+name: CI/CD Pipeline              # nome que aparece na aba Actions
+
+on:                               # quando rodar
+  push:                           # quando der git push...
+    branches:
+      - main                      # ...na main
+  pull_request:                   # quando abrir um PR...
+    branches:
+      - main                      # ...para a main
+
+jobs:
+  build:                          # nome do job
+    runs-on: ubuntu-latest        # roda num Linux do GitHub
+
+    # Sobe um Postgres para os testes usarem (some no fim)
+    services:
+      database:
+        image: postgres:17        # mesma imagem do docker-compose
+        env:
+          POSTGRES_DB: enveloppedb      # cria o banco enveloppedb
+          POSTGRES_USER: postgres       # usuário: postgres
+          POSTGRES_PASSWORD: postgres   # senha: postgres (banco de teste)
+        ports:
+          - 5432:5432             # banco fica em localhost:5432
+        options: >-               # só começa quando o banco responder
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    # Faz o papel do .env: o application.yaml lê daqui
+    env:
+      DATABASE_URL: jdbc:postgresql://localhost:5432/enveloppedb
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+
+    steps:                        # roda de cima para baixo; se um falhar, para
+
+      # 1. Baixa o código do repositório
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Procura import de Spring/jakarta/infrastructure no core
+      #    achou → mostra a linha e a pipeline fica vermelha
+      #    não achou → "Core limpo" e segue
+      - name: Check clean architecture
+        run: |
+          if grep -rnE "import (org\.springframework|jakarta|com\.enveloppe\.infrastructure)" src/main/java/com/enveloppe/core; then
+            echo "O core não pode importar Spring, jakarta ou infrastructure"
+            exit 1
+          fi
+          echo "Core limpo"
+
+      # 3. Instala o Java 21
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin   # mesmo Java do Dockerfile
+          java-version: '21'
+
+      # 4. Baixa as dependências, compila, cria a tabela (Flyway) e roda os testes
+      #    erro de código, de SQL ou teste quebrado → pipeline vermelha
+      - name: Build and test
+        run: ./mvnw -B verify     # -B deixa o log limpo
