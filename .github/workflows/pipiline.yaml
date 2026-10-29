@@ -33,6 +33,7 @@ jobs:
       DATABASE_URL: jdbc:postgresql://localhost:5432/enveloppedb
       DATABASE_USERNAME: postgres
       DATABASE_PASSWORD: postgres
+      JWT_SECRET: ci-test-secret  # chave só de teste; a real fica no .env
 
     steps:                        # roda de cima para baixo; se um falhar, para
 

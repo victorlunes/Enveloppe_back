@@ -73,6 +73,8 @@ services:
       # MEU PC -> DOCKER: usuário e senha que a API usa no banco, vêm do .env
       DATABASE_USERNAME: ${DATABASE_USERNAME}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      # MEU PC -> DOCKER: chave que assina os tokens JWT, vem do .env
+      JWT_SECRET: ${JWT_SECRET}
 
     # MEU PC -> DOCKER: quem acessar localhost:8080 no Mac cai na porta 8080 da API
     ports:

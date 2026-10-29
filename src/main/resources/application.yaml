@@ -25,3 +25,8 @@ spring:
 logging:
   level:
     org.springframework.jdbc.core: DEBUG #    eu poder ver os scripts sql no terminal
+
+enveloppe:
+  security:
+    # chave que assina os tokens JWT (o TokenService lê daqui). Vem do JWT_SECRET do .env, nunca escreva o valor aqui
+    secret: ${JWT_SECRET}

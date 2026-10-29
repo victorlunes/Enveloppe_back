@@ -4,10 +4,12 @@ import com.enveloppe.core.entities.User;
 import com.enveloppe.core.gateway.security.PasswordEncoderGateway;
 import com.enveloppe.core.gateway.users.UserGateway;
 
+// A regra de negócio do cadastro: criptografa a senha e manda salvar.
+// Repara que não tem @Component: o core não usa Spring. Quem cria essa classe é o BeanConfiguration.
 public class CreateUserUseCaseImpl implements CreateUserUseCase {
 
-    private final UserGateway userGateway;
-    private final PasswordEncoderGateway passwordEncoderGateway;
+    private final UserGateway userGateway;                       // na prática, o Spring entrega aqui o UserRepositoryGateway
+    private final PasswordEncoderGateway passwordEncoderGateway; // na prática, o Spring entrega aqui o BCryptPasswordEncoderGateway
 
     public CreateUserUseCaseImpl(
             UserGateway userGateway,
@@ -19,9 +21,9 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
 
     @Override
     public User execute(User user) {
-        String encodedPassword = passwordEncoderGateway.encode(user.password());
+        String encodedPassword = passwordEncoderGateway.encode(user.password()); // "123456" vira "$2a$10$Xk9...". Senha do jeito que a pessoa digitou nunca vai pro banco
 
-        User userWithEncodedPassword = new User(
+        User userWithEncodedPassword = new User( // record não deixa alterar, então cria um User novo, igualzinho, só que com o hash
                 user.id(),
                 user.name(),
                 user.email(),
@@ -29,6 +31,6 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
                 encodedPassword
         );
 
-        return userGateway.createUser(userWithEncodedPassword);
+        return userGateway.createUser(userWithEncodedPassword); // manda salvar. O use case nem sabe que é Postgres, só sabe que "salvou"
     }
 }
