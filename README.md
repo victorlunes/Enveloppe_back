@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/app-icons/preview/classico.png" width="96" alt="Ícone do Enveloppe" />
+  <img src="https://github.com/victorlunes/enveloppe_front/raw/main/assets/app-icons/preview/classico.png" width="96" alt="Ícone do Enveloppe" />
 </p>
 
 <h1 align="center">Enveloppe</h1>
@@ -9,13 +9,7 @@
   Um objetivo com data, uma declaração lida todo dia e cartas que aparecem quando bate o impulso, a dúvida ou o medo.
 </p>
 
-<p align="center">
-  <a href="docs/videos/apresentacao.mp4">
-    <img src="docs/videos/apresentacao.jpg" width="280" alt="Tela Hoje do Enveloppe. Toque para ver o vídeo" />
-  </a>
-  <br />
-  <sub>Toque na imagem para ver o vídeo do app.</sub>
-</p>
+https://github.com/user-attachments/assets/8fdcefb0-775b-456b-9e91-e3c957f342df
 
 ---
 
@@ -66,7 +60,7 @@ O Enveloppe parte de três ideias simples:
 2. **A mudança acontece nos momentos pequenos.** Não no começo de ano, mas nos dez segundos entre a vontade de adiar e a decisão de começar.
 3. **Repetição com emoção muda quem você é.** Ler, ensaiar e sentir todos os dias, até o novo jeito virar o automático.
 
-E uma regra de privacidade: **tudo o que você escreve fica no seu aparelho.** Nada vai para servidor.
+E uma regra de privacidade: **o que você escreve é só seu.** A senha nunca é guardada, só uma versão cifrada dela, e cada pessoa só consegue ver e mudar os próprios dados, com o token da própria conta.
 
 ## Um dia no app
 
@@ -104,13 +98,17 @@ São duas trilhas de **14 selos** cada, que se encontram no selo **Início**:
 
 O ícone Clássico e o selo Laranja já vêm liberados.
 
-## Tecnologia
+## Este repositório
 
-App em **React Native** com **Expo** e **TypeScript**, para iOS e Android.
+Aqui fica o **back-end** do Enveloppe: a API que guarda as contas e os dados do app. O app em si fica no repositório [enveloppe_front](https://github.com/victorlunes/enveloppe_front).
 
-- `src/app`: telas, com Expo Router. As abas ficam em `src/app/(tabs)`
-- `src/components`: Envelopinho (SVG animado), selos, botões, cartões e recados
-- `src/store`: os dados, salvos num arquivo JSON no próprio aparelho
-- `src/lib`: contas (senha só como hash, no armazenamento seguro), datas, princípios, missões e recompensas
-- `assets/app-icons`: os ícones alternativos do app
-- `assets/fonts`: Shantell Sans (SIL Open Font License)
+### Tecnologia
+
+API em **Java 21** com **Spring Boot**, banco **PostgreSQL** e migrações com **Flyway**. O login usa **JWT**.
+
+O código segue a arquitetura limpa: as regras do negócio não dependem do Spring, e a integração contínua confere isso a cada push.
+
+- `src/main/java/com/enveloppe/core`: as regras do negócio (entidades, casos de uso e as portas de entrada e saída), sem nada do Spring
+- `src/main/java/com/enveloppe/infrastructure`: o que liga as regras ao mundo (controllers, banco, segurança, DTOs e conversões)
+- `src/main/resources/db/migration`: as migrações do banco
+- `docs`: documentação das rotinas da API
