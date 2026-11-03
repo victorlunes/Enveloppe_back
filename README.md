@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/victorlunes/enveloppe_front/raw/main/assets/app-icons/preview/classico.png" width="96" alt="Ícone do Enveloppe" />
+  <img src="docs/img/icone.png" width="96" alt="Ícone do Enveloppe" />
 </p>
 
 <h1 align="center">Enveloppe</h1>
