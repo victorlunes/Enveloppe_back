@@ -1,7 +1,3 @@
-
-
-https://github.com/user-attachments/assets/d2b84d01-70bc-4743-a1c4-f6fbb38cd6b9
-
 <p align="center">
   <img src="docs/img/icone.png" width="96" alt="Ícone do Enveloppe" />
 </p>
@@ -13,7 +9,7 @@ https://github.com/user-attachments/assets/d2b84d01-70bc-4743-a1c4-f6fbb38cd6b9
   Um objetivo com data, uma declaração lida todo dia e cartas que aparecem quando bate o impulso, a dúvida ou o medo.
 </p>
 
-https://github.com/user-attachments/assets/8fdcefb0-775b-456b-9e91-e3c957f342df
+https://github.com/user-attachments/assets/d2b84d01-70bc-4743-a1c4-f6fbb38cd6b9
 
 ---
 
