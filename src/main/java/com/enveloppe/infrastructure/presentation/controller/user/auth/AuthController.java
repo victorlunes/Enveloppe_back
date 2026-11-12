@@ -1,11 +1,11 @@
-package com.enveloppe.infrastructure.presentation.controller.auth;
+package com.enveloppe.infrastructure.presentation.controller.user.auth;
 
 import com.enveloppe.core.entities.User;
 import com.enveloppe.core.useCases.users.createUser.CreateUserUseCase;
 import com.enveloppe.infrastructure.dtos.users.login.LoginRequest;
 import com.enveloppe.infrastructure.dtos.users.login.LoginResponse;
-import com.enveloppe.infrastructure.dtos.users.user.UserRequest;
-import com.enveloppe.infrastructure.dtos.users.user.UserResponse;
+import com.enveloppe.infrastructure.dtos.users.createUser.UserCreateRequest;
+import com.enveloppe.infrastructure.dtos.users.createUser.UserCreateResponse;
 import com.enveloppe.infrastructure.mapper.users.UserEntityMapper;
 import com.enveloppe.infrastructure.mapper.users.UserMapper;
 import com.enveloppe.infrastructure.persistence.users.entities.UserEntity;
@@ -47,8 +47,8 @@ public class AuthController {
     }
 
     @PostMapping("/register") // POST porque estamos CRIANDO algo: um usuário novo
-    public ResponseEntity<UserResponse> register(@RequestBody UserRequest userRequest) { // @RequestBody: o Spring pega o JSON do corpo e transforma em UserRequest sozinho
-        User user = userMapper.toUser(userRequest);     // JSON (infra) → User (core). O core não pode conhecer DTO, por isso converte antes
+    public ResponseEntity<UserCreateResponse> register(@RequestBody UserCreateRequest userCreateRequest) { // @RequestBody: o Spring pega o JSON do corpo e transforma em UserRequest sozinho
+        User user = userMapper.toUser(userCreateRequest);     // JSON (infra) → User (core). O core não pode conhecer DTO, por isso converte antes
         User newUser = createUserUseCase.execute(user); // chama a regra de negócio: criptografa a senha e salva no banco
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toUserResponse(newUser)); // 201 = "criei". E devolve só nome e email, senha nunca
     }

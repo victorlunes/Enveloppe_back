@@ -166,7 +166,7 @@ O que entra e o que sai de cada camada:
 
 | Objeto | Quem conhece | Onde aparece |
 |---|---|---|
-| `UserRequest` / `UserResponse` | só a infra (web) | controller e `UserMapper` |
+| `UserCreateRequest` / `UserCreateResponse` | só a infra (web) | controller e `UserMapper` |
 | `User` | core e infra | tudo que passa pelo use case |
 | `UserEntity` | só a infra (banco) | `UserRepositoryGateway`, `UserEntityMapper`, `UserRepository` |
 
@@ -190,8 +190,8 @@ public record UserRequest(String name, String email, LocalDate birthday, String 
 public record UserResponse(String name, String email) { }
 ```
 
-- O Spring (Jackson) transforma o JSON recebido em `UserRequest` casando cada campo pelo nome.
-- O `UserResponse` não tem `password` (nunca sai na resposta), nem `birthday`, nem `id` (ver [Decisões](#7-decisões-tomadas)).
+- O Spring (Jackson) transforma o JSON recebido em `UserCreateRequest` casando cada campo pelo nome.
+- O `UserCreateResponse` não tem `password` (nunca sai na resposta), nem `birthday`, nem `id` (ver [Decisões](#7-decisões-tomadas)).
 
 ### Passo 2 — Entidade do domínio (`User`)
 
@@ -333,7 +333,7 @@ Comparação com o movieflix:
 
 | movieflix (`UserService`) | enveloppe (`CreateUserUseCaseImpl`) | Por quê |
 |---|---|---|
-| `userMapper.toUser(userRequest)` | não está aqui | converter JSON é papel do controller |
+| `userMapper.toUser(userCreateRequest)` | não está aqui | converter JSON é papel do controller |
 | `newUser.setPassword(passwordEncoder.encode(...))` | `passwordEncoderGateway.encode(...)` + `new User(...)` | `User` é record, sem setter |
 | `userRepository.save(newUser)` | `userGateway.createUser(...)` | fala com o contrato, não com o banco |
 | `return userMapper.toUserResponse(newUser)` | `return` do `User` | montar a resposta é papel do controller |
@@ -508,7 +508,7 @@ public class BeanConfiguration {
 
 ### Passo 12 — Entrada da API: `UserMapper` e `AuthController`
 
-**Arquivos:** [`UserMapper.java`](../src/main/java/com/enveloppe/infrastructure/mapper/users/UserMapper.java), [`AuthController.java`](../src/main/java/com/enveloppe/infrastructure/presentation/controller/auth/AuthController.java)
+**Arquivos:** [`UserMapper.java`](../src/main/java/com/enveloppe/infrastructure/mapper/users/UserMapper.java), [`AuthController.java`](../src/main/java/com/enveloppe/infrastructure/presentation/controller/user/auth/AuthController.java)
 **movieflix:** `mapper/user/UserMapper.java` e `controller/user/AuthController.register`
 
 **12.1 — `UserMapper` (JSON ↔ core):**
@@ -517,9 +517,9 @@ public class BeanConfiguration {
 @Component
 public class UserMapper {
 
-    public User toUser(UserRequest userRequest) {
-        return new User(null, userRequest.name(), userRequest.email(),
-                        userRequest.birthday(), userRequest.password());
+    public User toUser(UserRequest userCreateRequest) {
+        return new User(null, userCreateRequest.name(), userCreateRequest.email(),
+                        userCreateRequest.birthday(), userCreateRequest.password());
     }
 
     public UserResponse toUserResponse(User user) {
@@ -543,8 +543,8 @@ public class AuthController {
     private final UserMapper userMapper;
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestBody UserRequest userRequest) {
-        User user = userMapper.toUser(userRequest);
+    public ResponseEntity<UserResponse> register(@RequestBody UserRequest userCreateRequest) {
+        User user = userMapper.toUser(userCreateRequest);
         User newUser = createUserUseCase.execute(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toUserResponse(newUser));
     }
@@ -552,7 +552,7 @@ public class AuthController {
 ```
 
 - `@RestController` + `@RequestMapping`: responde às URLs que começam com `/enveloppe/auth`.
-- `@PostMapping("/register")` + `@RequestBody`: o JSON do corpo vira `UserRequest`.
+- `@PostMapping("/register")` + `@RequestBody`: o JSON do corpo vira `UserCreateRequest`.
 - O controller faz só três coisas: **traduz a entrada, chama o use case, traduz a saída**. Não tem regra de negócio e não conhece gateway, repositório nem BCrypt.
 - `HttpStatus.CREATED` = `201`, o status de "recurso criado".
 
@@ -593,8 +593,8 @@ UserMapper ───────────────────────
 | **Sem Lombok** | Construtor e getters escritos à mão em `UserEntity`. Sem setters: os campos são `final`. |
 | **`LocalDate` em vez de `java.util.Date`** | `Date` é um instante (data + hora + fuso) e é mutável. Com fuso (UTC-3), `2000-05-10` pode virar `2000-05-09` no banco. `LocalDate` é só a data, imutável, e mapeia direto para `DATE`. |
 | **`birthday` opcional na tabela** | Coluna sem `NOT NULL`. |
-| **`birthday` não volta na resposta** | `UserResponse` só tem `name` e `email`. |
-| **`INSERT` sem retornar o `id`** | O cadastro não precisa devolver o `id`, então o `INSERT` é puro (`.update()`) e o `User` retornado tem `id = null`. Por isso o `id` também saiu do `UserResponse`. O login não é afetado: ele vai buscar o usuário com `SELECT ... WHERE email = ...`, e aí o `id` vem do banco. Alternativas, se um dia precisar do `id`: `RETURNING id` (Postgres) ou `KeyHolder` (JDBC, qualquer banco). |
+| **`birthday` não volta na resposta** | `UserCreateResponse` só tem `name` e `email`. |
+| **`INSERT` sem retornar o `id`** | O cadastro não precisa devolver o `id`, então o `INSERT` é puro (`.update()`) e o `User` retornado tem `id = null`. Por isso o `id` também saiu do `UserCreateResponse`. O login não é afetado: ele vai buscar o usuário com `SELECT ... WHERE email = ...`, e aí o `id` vem do banco. Alternativas, se um dia precisar do `id`: `RETURNING id` (Postgres) ou `KeyHolder` (JDBC, qualquer banco). |
 | **`PasswordEncoderGateway` no core** | A regra "senha nunca em texto puro" fica visível no use case. Alternativa válida (não adotada): criptografar dentro do `UserRepositoryGateway`, o que esconderia a regra na infra. |
 | **Login removido do controller por enquanto** | O código antigo usava classes que ainda não existem. Volta na fase de login via `LoginUseCase`. |
 

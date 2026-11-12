@@ -26,4 +26,10 @@ public class UserRepositoryGateway implements UserGateway {
         UserEntity savedUser = userRepository.save(userEntity);       // roda o INSERT
         return userEntityMapper.toUser(savedUser);                    // UserEntity → User, e devolve pro use case
     }
+
+    @Override
+    public boolean updateEntry(Long userId) {
+        return userRepository.registerDailyEntry(userId);
+    }
+
 }

@@ -1,10 +1,10 @@
-package com.enveloppe.infrastructure.dtos.users.user;
+package com.enveloppe.infrastructure.dtos.users.createUser;
 
 import java.time.LocalDate;
 
 // O JSON que chega no cadastro. O Spring preenche esse record sozinho, casando pelo nome dos campos:
 // { "name": "Ana", "email": "ana@email.com", "birthday": "1998-05-20", "password": "123456" }
-public record UserRequest(
+public record UserCreateRequest(
         String name,
         String email,
         LocalDate birthday, // no JSON vem como texto "AAAA-MM-DD" e o Spring converte pra LocalDate

@@ -48,4 +48,16 @@ public class UserRepository {
                 ))
                 .optional(); // nenhuma linha → Optional vazio. Atenção: se existirem 2 usuários com o mesmo email, aqui dá erro
     }
+
+    public boolean registerDailyEntry(Long userId) {
+        return jdbcClient.sql("""
+            UPDATE elp_users
+               SET qty_input = qty_input + 1,
+                   last_entry_on = (now() AT TIME ZONE 'America/Sao_Paulo')::date
+             WHERE id = :id
+               AND (last_entry_on IS NULL OR last_entry_on < (now() AT TIME ZONE 'America/Sao_Paulo')::date)
+            """)
+                .param("id", userId)
+                .update() > 0;
+    }
 }
