@@ -4,6 +4,8 @@ import com.enveloppe.core.gateway.security.PasswordEncoderGateway;
 import com.enveloppe.core.gateway.users.UserGateway;
 import com.enveloppe.core.useCases.users.createUser.CreateUserUseCase;
 import com.enveloppe.core.useCases.users.createUser.CreateUserUseCaseImpl;
+import com.enveloppe.core.useCases.users.updateEntry.UpdateEntryUseCase;
+import com.enveloppe.core.useCases.users.updateEntry.UpdateEntryUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,5 +20,11 @@ public class BeanConfiguration {
             PasswordEncoderGateway passwordEncoderGateway // o Spring preenche sozinho com o BCryptPasswordEncoderGateway
     ) {
         return new CreateUserUseCaseImpl(userGateway, passwordEncoderGateway); // monta o use case com as peças da infra
+    }
+
+    @Bean
+    public UpdateEntryUseCase updateEntryUseCase(UserGateway userGateway)
+    {
+        return new UpdateEntryUseCaseImpl(userGateway);
     }
 }

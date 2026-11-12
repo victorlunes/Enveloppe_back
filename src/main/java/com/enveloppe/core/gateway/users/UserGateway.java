@@ -6,4 +6,6 @@ import com.enveloppe.core.entities.User;
 // Quem faz de verdade é o UserRepositoryGateway, lá na infra, com um INSERT no Postgres.
 public interface UserGateway {
     User createUser(User user); // recebe o usuário com a senha já criptografada e salva
+
+    boolean updateEntry(Long userId);
 }
