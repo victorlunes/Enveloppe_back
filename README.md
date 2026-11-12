@@ -98,10 +98,6 @@ São duas trilhas de **14 selos** cada, que se encontram no selo **Início**:
 
 O ícone Clássico e o selo Laranja já vêm liberados.
 
-## Este repositório
-
-Aqui fica o **back-end** do Enveloppe: a API que guarda as contas e os dados do app. O app em si fica no repositório [enveloppe_front](https://github.com/victorlunes/enveloppe_front).
-
 ### Tecnologia
 
 API em **Java 21** com **Spring Boot**, banco **PostgreSQL** e migrações com **Flyway**. O login usa **JWT**.
