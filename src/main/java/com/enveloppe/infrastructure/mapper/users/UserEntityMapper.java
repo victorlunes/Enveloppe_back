@@ -8,23 +8,19 @@ import org.springframework.stereotype.Component;
 @Component // o Spring cria e entrega pro UserRepositoryGateway (cadastro) e pro AuthController (login)
 public class UserEntityMapper {
 
-    public UserEntity toUserEntity(User user) { // cadastro: User → UserEntity, antes do INSERT
-        return new UserEntity(
-                user.id(),
-                user.name(),
-                user.email(),
-                user.birthday(),
-                user.password()
-        );
+    public UserEntity toUserEntity(User user) {
+        // cadastro: User → UserEntity, antes do INSERT
+        return new UserEntity(user.id(), user.name(), user.email(), user.birthday(), user.password());
     }
 
-    public User toUser(UserEntity userEntity) { // cadastro: depois do INSERT | login: o UserEntity que logou vira User pro TokenService
+    public User toUser(UserEntity userEntity) {
+        // cadastro: depois do INSERT | login: o UserEntity que logou vira User pro TokenService
         return new User(
-                userEntity.getId(),
-                userEntity.getName(),
-                userEntity.getEmail(),
-                userEntity.getBirthday(),
-                userEntity.getPassword()
+            userEntity.getId(),
+            userEntity.getName(),
+            userEntity.getEmail(),
+            userEntity.getBirthday(),
+            userEntity.getPassword()
         );
     }
 }

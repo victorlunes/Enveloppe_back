@@ -83,6 +83,76 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+			<!-- Descobre onde está o jar do Mockito e guarda o caminho na propriedade ${org.mockito:mockito-core:jar} -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>properties</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Roda os testes com o Mockito como agente do Java (a partir do Java 21 ele avisa e, no futuro, vai exigir isso) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- @{argLine} = o que o JaCoCo já colocou ali. Sem ele, a cobertura sairia zerada -->
+					<!--suppress UnresolvedMavenProperty -->
+					<argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+				</configuration>
+			</plugin>
+
+			<!-- JaCoCo: mede quanto do código os testes executam e reprova o build se ficar abaixo do mínimo -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.14</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id> <!-- liga a medição antes dos testes -->
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id> <!-- gera o relatório em target/site/jacoco/index.html -->
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>check</id> <!-- a trava: abaixo do mínimo, o ./mvnw verify falha -->
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>CLASS</element> <!-- confere classe por classe -->
+									<includes>
+										<include>com.enveloppe.core.useCases.*Impl</include> <!-- todo *UseCaseImpl, em qualquer subpacote -->
+									</includes>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum> <!-- cada use case precisa de pelo menos 80% das linhas testadas -->
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

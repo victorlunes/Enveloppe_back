@@ -4,6 +4,7 @@ import com.enveloppe.core.entities.Mural;
 import com.enveloppe.core.gateway.users.mural.MuralGateway;
 
 public class CreateMuralUseCaseImpl implements CreateMuralUseCase {
+
     private final MuralGateway muralGateway;
 
     public CreateMuralUseCaseImpl(MuralGateway muralGateway) {

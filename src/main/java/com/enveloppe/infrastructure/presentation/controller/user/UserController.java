@@ -13,15 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/enveloppe/user")
 public class UserController {
 
-    private final UpdateEntryUseCase updateEntryUseCase;         // cadastro: a regra de negócio, lá do core
+    private final UpdateEntryUseCase updateEntryUseCase; // cadastro: a regra de negócio, lá do core
+
     //private final UserMapper userMapper;                       // cadastro: converte JSON ↔ User
     //private final UserEntityMapper userEntityMapper;           // login: converte o UserEntity que logou em User
 
     public UserController(
-            UpdateEntryUseCase updateEntryUseCase
-            //UserMapper userMapper,
-            //UserEntityMapper userEntityMapper
-    ){
+        UpdateEntryUseCase updateEntryUseCase
+        //UserMapper userMapper,
+        //UserEntityMapper userEntityMapper
+    ) {
         this.updateEntryUseCase = updateEntryUseCase;
         //this.userMapper = userMapper;
         //this.userEntityMapper = userEntityMapper;
@@ -31,7 +32,7 @@ public class UserController {
     public ResponseEntity<String> lastEntryOnUpdate(@AuthenticationPrincipal JWTUserData user) {
         boolean result = updateEntryUseCase.execute(user.id());
 
-        if (result){
+        if (result) {
             return ResponseEntity.status(HttpStatus.OK).body("Sequencia de uso do app atualizada com sucesso");
         }
         return ResponseEntity.status(HttpStatus.OK).body("Sequencia de uso do app já esta atualizada");

@@ -34,3 +34,6 @@ build/
 
 ### Variáveis de ambiente (credenciais) ###
 .env
+
+### Node (Prettier) ###
+node_modules/

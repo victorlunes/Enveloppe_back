@@ -13,10 +13,7 @@ public class MuralRepositoryGateway implements MuralGateway {
     private final MuralRepository muralRepository;
     private final MuralEntityMapper muralEntityMapper;
 
-    public MuralRepositoryGateway(
-            MuralRepository muralRepository,
-            MuralEntityMapper muralEntityMapper
-    ){
+    public MuralRepositoryGateway(MuralRepository muralRepository, MuralEntityMapper muralEntityMapper) {
         this.muralRepository = muralRepository;
         this.muralEntityMapper = muralEntityMapper;
     }
@@ -24,7 +21,7 @@ public class MuralRepositoryGateway implements MuralGateway {
     @Override
     public Mural createMural(Mural mural) {
         MuralEntity postMural = muralEntityMapper.toMuralEntity(mural); // core → banco
-        MuralEntity saved = muralRepository.save(postMural);            // INSERT, já volta com id e datas
-        return muralEntityMapper.toMural(saved);                        // banco → core
+        MuralEntity saved = muralRepository.save(postMural); // INSERT, já volta com id e datas
+        return muralEntityMapper.toMural(saved); // banco → core
     }
 }

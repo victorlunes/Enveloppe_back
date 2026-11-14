@@ -1,28 +1,28 @@
 package com.enveloppe.infrastructure.persistence.users.entities;
 
+import com.enveloppe.core.enums.MuralType;
 import java.time.LocalDateTime;
 
-import com.enveloppe.core.enums.MuralType;
-
 public class MuralEntity {
-    private Long id;                  // quem gera é o banco. Na criação chega null
-    private Long userId;              // dono da conquista. Vem do token, nunca do que a tela manda
+
+    private Long id; // quem gera é o banco. Na criação chega null
+    private Long userId; // dono da conquista. Vem do token, nunca do que a tela manda
     private String title;
-    private MuralType type;           // CARREIRA, SAUDE, VIAGEM...
-    private String observation;       // opcional
+    private MuralType type; // CARREIRA, SAUDE, VIAGEM...
+    private String observation; // opcional
     private LocalDateTime achievedIn; // quando a pessoa conquistou (pode ser no passado)
-    private LocalDateTime createdAt;  // quem preenche é o banco
-    private LocalDateTime updatedAt;  // quem preenche é o banco
+    private LocalDateTime createdAt; // quem preenche é o banco
+    private LocalDateTime updatedAt; // quem preenche é o banco
 
     public MuralEntity(
-            Long id,
-            Long userId,
-            String title,
-            MuralType type,
-            String observation,
-            LocalDateTime achievedIn,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt
+        Long id,
+        Long userId,
+        String title,
+        MuralType type,
+        String observation,
+        LocalDateTime achievedIn,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
     ) {
         this.id = id;
         this.userId = userId;

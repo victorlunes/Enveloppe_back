@@ -3,8 +3,8 @@
 
 # ===== PARTE 1: gera o .jar =====
 
-# DOCKER: usa uma imagem que já tem Maven + Java 21 para compilar o projeto
-FROM maven:3.9.9-eclipse-temurin-21 AS build
+# DOCKER: usa uma imagem que já tem Maven + Java 25 para compilar o projeto
+FROM maven:3.9-eclipse-temurin-25 AS build
 
 # MEU PC -> DOCKER: copia a pasta src do projeto para /app/src
 COPY src /app/src
@@ -21,8 +21,8 @@ RUN mvn clean install -DskipTests
 
 # ===== PARTE 2: roda o .jar =====
 
-# DOCKER: começa uma imagem nova, só com Java 21 para rodar (menor que a da parte 1)
-FROM eclipse-temurin:21-jre-alpine
+# DOCKER: começa uma imagem nova, só com Java 25 para rodar (menor que a da parte 1)
+FROM eclipse-temurin:25-jre-alpine
 
 # PARTE 1 -> PARTE 2: pega o .jar gerado lá em cima e salva como /app/app.jar
 COPY --from=build /app/target/enveloppe-0.0.1-SNAPSHOT.jar /app/app.jar

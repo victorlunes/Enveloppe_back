@@ -3,13 +3,40 @@ name: CI/CD Pipeline              # nome que aparece na aba Actions
 on:                               # quando rodar
   push:                           # quando der git push...
     branches:
-      - main                      # ...na main
+      - "**"                      # ...em qualquer branch (feat/*, main...)
   pull_request:                   # quando abrir um PR...
     branches:
       - main                      # ...para a main
 
+# Regra: qualquer branch roda a esteira (format + testes). Só a main faz deploy, e só se tudo passar.
+
 jobs:
+  # ===== FORMATAÇÃO (Prettier) =====
+  format:
+    name: Formatação (Prettier)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm              # reaproveita o node_modules entre execuções
+
+      # instala exatamente as versões do package-lock.json
+      - name: Install Prettier
+        run: npm ci
+
+      # código fora do padrão → mostra os arquivos e a pipeline fica vermelha
+      # para corrigir na sua máquina: npm run format
+      - name: Check format
+        run: npm run format:check
+
+  # ===== BUILD + TESTES =====
   build:                          # nome do job
+    name: Build, testes e cobertura
     runs-on: ubuntu-latest        # roda num Linux do GitHub
 
     # Sobe um Postgres para os testes usarem (some no fim)
@@ -52,14 +79,50 @@ jobs:
           fi
           echo "Core limpo"
 
-      # 3. Instala o Java 21
-      - name: Set up Java 21
+      # 3. Instala o Java 25 (o mesmo do pom.xml)
+      - name: Set up Java 25
         uses: actions/setup-java@v4
         with:
           distribution: temurin   # mesmo Java do Dockerfile
-          java-version: '21'
+          java-version: '25'
 
-      # 4. Baixa as dependências, compila, cria a tabela (Flyway) e roda os testes
-      #    erro de código, de SQL ou teste quebrado → pipeline vermelha
+      # 4. Todo *UseCaseImpl do core precisa de um *UseCaseImplTest com Mockito
+      #    faltou teste ou o teste não usa Mockito → mostra qual e a pipeline fica vermelha
+      - name: Check unit tests (Mockito)
+        run: bash scripts/check-unit-tests.sh
+
+      # 5. Baixa as dependências, compila, cria a tabela (Flyway) e roda os testes
+      #    erro de código, de SQL, teste quebrado ou use case com menos de 80% de cobertura (JaCoCo) → pipeline vermelha
       - name: Build and test
         run: ./mvnw -B verify     # -B deixa o log limpo
+
+      # 6. Guarda o relatório de cobertura (target/site/jacoco/index.html) para baixar na aba Actions
+      - name: Upload coverage report
+        if: always()              # sobe mesmo se a cobertura reprovar, para você ver o que faltou
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco
+
+  # ===== DEPLOY (só main) =====
+  # needs: só começa se format E build passaram
+  # if: só em push na main (branch feat/* e PR rodam a esteira, mas não fazem deploy)
+  deploy:
+    name: Deploy
+    needs: [format, build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-main          # dois pushes seguidos na main → um deploy por vez
+      cancel-in-progress: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # gera a imagem que vai para produção (mesmo Dockerfile do projeto)
+      - name: Build Docker image
+        run: docker build -t enveloppe:${{ github.sha }} .
+
+      # TODO: publicar a imagem e atualizar o servidor (ex.: docker push + ssh / Render / Railway / Fly.io)
+      - name: Deploy
+        run: echo "Imagem enveloppe:${{ github.sha }} pronta. Falta configurar o destino do deploy."

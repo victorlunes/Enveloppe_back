@@ -15,11 +15,13 @@ public enum MuralType {
 
     private final String label; // o texto de tela de cada valor
 
-    MuralType(String label) { // o Java chama sozinho, uma vez para cada valor da lista
+    MuralType(String label) {
+        // o Java chama sozinho, uma vez para cada valor da lista
         this.label = label;
     }
 
-    public String getLabel() { // MuralType.SAUDE.getLabel() → "Saúde" | MuralType.SAUDE.name() → "SAUDE"
+    public String getLabel() {
+        // MuralType.SAUDE.getLabel() → "Saúde" | MuralType.SAUDE.name() → "SAUDE"
         return label;
     }
 }

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component // por ser o único que implementa UserGateway, o Spring entrega ele pro use case
 public class UserRepositoryGateway implements UserGateway {
 
-    private final UserRepository userRepository;     // quem roda o SQL
+    private final UserRepository userRepository; // quem roda o SQL
     private final UserEntityMapper userEntityMapper; // quem converte User ↔ UserEntity
 
     public UserRepositoryGateway(UserRepository userRepository, UserEntityMapper userEntityMapper) {
@@ -23,13 +23,12 @@ public class UserRepositoryGateway implements UserGateway {
     @Override
     public User createUser(User user) {
         UserEntity userEntity = userEntityMapper.toUserEntity(user); // User (core) → UserEntity (banco)
-        UserEntity savedUser = userRepository.save(userEntity);       // roda o INSERT
-        return userEntityMapper.toUser(savedUser);                    // UserEntity → User, e devolve pro use case
+        UserEntity savedUser = userRepository.save(userEntity); // roda o INSERT
+        return userEntityMapper.toUser(savedUser); // UserEntity → User, e devolve pro use case
     }
 
     @Override
     public boolean updateEntry(Long userId) {
         return userRepository.registerDailyEntry(userId);
     }
-
 }

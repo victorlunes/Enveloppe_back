@@ -9,17 +9,19 @@ import org.springframework.stereotype.Component;
 @Component // o Spring cria e entrega pro AuthController
 public class UserMapper {
 
-    public User toUser(UserCreateRequest userCreateRequest) { // ida: JSON que chegou → User
+    public User toUser(UserCreateRequest userCreateRequest) {
+        // ida: JSON que chegou → User
         return new User(
-                null,                   // id ainda não existe: quem gera é o banco
-                userCreateRequest.name(),
-                userCreateRequest.email(),
-                userCreateRequest.birthday(),
-                userCreateRequest.password()  // ainda é a senha pura. Quem criptografa é o use case
+            null, // id ainda não existe: quem gera é o banco
+            userCreateRequest.name(),
+            userCreateRequest.email(),
+            userCreateRequest.birthday(),
+            userCreateRequest.password() // ainda é a senha pura. Quem criptografa é o use case
         );
     }
 
-    public UserCreateResponse toUserResponse(User user) { // volta: User → JSON de resposta
+    public UserCreateResponse toUserResponse(User user) {
+        // volta: User → JSON de resposta
         return new UserCreateResponse(user.name(), user.email()); // só nome e email. Senha e aniversário ficam de fora
     }
 }
